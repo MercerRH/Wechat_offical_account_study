@@ -1,11 +1,13 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_template
 import hashlib
 import xmltodict
 import time
+import json
 
 app = Flask(__name__)
 
 
+# 进行微信公众号验证的视图
 @app.route('/return_all', methods=['GET', 'POST'])
 def return_all():
     data = request.args
@@ -80,5 +82,20 @@ def return_all():
                 return xml_response
 
 
+# 提交问卷的视图
+@app.route('/test/')
+def test():
+    return render_template('put.html')
+
+
+# 将问卷信息写入mysql数据库的视图
+@app.route('/put_to_db/', methods=['GET', 'POST'])
+def put_to_db():
+    json_data = request.get_json()
+    resp_json = {'res': 1}
+    return json.dumps(resp_json), 200
+
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
+    # app.run(host='0.0.0.0', port=80)
+    app.run()

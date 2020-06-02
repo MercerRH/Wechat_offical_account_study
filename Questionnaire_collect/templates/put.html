@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" charset="UTF-8">
+    <title>加入问卷</title>
+    <script src="/static/js/jquery-3.0.0.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+
+    <script>
+        $(function () {
+            $('#submit_btn').click(function () {
+                if($("#q_title").val() == "" || $('#q_url').val() == "" || $('#q_request').val() == ""){
+                    alert("请将问卷信息填写完整")
+                }
+                else {
+                    $q_title = $("#q_title").val()
+                    $q_url = $('#q_url').val()
+                    $q_request = $('#q_request').val()
+                    $.ajax({
+                        'url': '/put_to_db/',
+                        'type': 'POST',
+                        'dataType': 'json',
+                        'data': {
+                            'q_title': $q_title,
+                            'q_url': $q_url,
+                            'q_request': $q_request
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.res == 1){
+                                alert('成功')
+                            }
+                        })
+                }
+            })
+        })
+    </script>
+
+    <style>
+        #content{
+            width: 80%;
+            height: 80%;
+            position: fixed;
+            left: 10%;
+            top: 10%;
+        }
+        .title{
+            font-size: 30px;
+            text-align: center;
+            margin: 10px;
+        }
+        .label_title{
+            margin-bottom: 10px;
+        }
+        #submit_btn{
+            margin-top: 30px;
+        }
+        #warning{
+            display: none;
+        }
+        .form-group input{
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <div class="form-group">
+            <div class="title">添加问卷</div>
+            <label for="q_title" class="label_title">问卷标题</label>
+            <input class="form-control" type="text" placeholder="请输入问卷标题" name="q_title" id="q_title">
+            <label for="q_url" class="label_title">问卷链接</label>
+            <input class="form-control" type="text" placeholder="请输入问卷链接" name="q_url" id="q_url">
+            <label for="q_request" class="label_title">问卷要求</label>
+            <textarea class="form-control" name="q_request" id="q_request" placeholder="输入问卷的要求，例如被试年龄、性别"></textarea>
+            <button class="btn btn-primary btn-lg btn-block" id="submit_btn">提交</button>
+        </div>
+    </div>
+</body>
+</html>
