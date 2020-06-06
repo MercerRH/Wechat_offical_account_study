@@ -32,6 +32,9 @@
                                 alert('添加成功！问卷id为' + data.q_id)
                                 window.location.href='/get_list/'
                             }
+                            else if (data.res == 0) {
+                                alert('链接格式错误，请确保以http://或https://开头')
+                            }
                         })
                 }
             })

@@ -7,6 +7,10 @@ import json
 from wechat import app
 from models import Questionnaire
 from wechat import db
+import re
+import requests
+
+OPEN_ID = 'NULL'  # 获取的用户OPEN_ID
 
 
 # 进行微信公众号验证的视图
@@ -87,6 +91,22 @@ def return_all():
 # 提交问卷的视图
 @app.route('/put/')
 def put():
+    """获取用户APPID，及显示添加问卷模板"""
+    code = request.args.get('code')  # 微信服务器返回的code，作为换取access_token的票据，5分钟过期
+    state = request.args.get('state')  # 微信返回的state码
+
+    # 请求网页授权access_token
+    request_url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=wx1e1d3b473be90fcf&secret" \
+                  "=ef2d1efbd836fd49dcc4a2c4157ed931&code={}&grant_type=authorization_code".format(code)
+
+    # 获取返回值，为一个json字符串
+    response = requests.get(request_url)
+    response_dict = response.json()
+    # response_dict = json.loads(response_json)
+
+    global OPEN_ID
+    OPEN_ID = response_dict.get('openid')
+
     return render_template('put.html')
 
 
@@ -99,12 +119,16 @@ def put_to_db():
     request_str = request.form.get("q_request")
 
     # 将数据存入数据库
-    q = Questionnaire(title=title, url=url, request=request_str)
+    global OPEN_ID
+    q = Questionnaire(title=title, url=url, request=request_str, openid=OPEN_ID)
     db.session.add(q)
     db.session.commit()
 
-    # 返回插入成功
-    resp_json = {'res': 1, 'q_id': q.id}
+    # 返回json数据
+    if re.match('^http[s]?://.*', url) == None:
+        resp_json = {'res': 0, 'q_id': q.id}
+    else:
+        resp_json = {'res': 1, 'q_id': q.id}
     return json.dumps(resp_json), 200
 
 
@@ -127,9 +151,9 @@ def get_list():
         }
 
     else:
-        q_page = q_all_count//9 + 1
-        q_all = Questionnaire.query.offset((int(page)-1)*9).limit(9).all()
-        q_page_list = [str(i+1) for i in range(q_page)]
+        q_page = q_all_count // 9 + 1
+        q_all = Questionnaire.query.offset((int(page) - 1) * 9).limit(9).all()
+        q_page_list = [str(i + 1) for i in range(q_page)]
 
         data = {
             'q_all': q_all,
